@@ -1,0 +1,8 @@
+.DS_Store
+
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/gerichilli/CS221-NLP-Project-Vi-Fact-Checking.git
+git push -u origin main
