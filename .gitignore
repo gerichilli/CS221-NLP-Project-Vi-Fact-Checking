@@ -1,13 +1,90 @@
+# ==============================================================================
+# 1. Hệ điều hành & File rác (OS & Temporary files)
+# ==============================================================================
 .DS_Store
+._*
+Thumbs.db
+*.log
+hs_err_pid*.log
 
-# Models
-notebooks/models/bamibert/outputs/*
-outputs/*
-!outputs/bamibert/
-outputs/bamibert/*
-!outputs/bamibert/experiments_leaderboard.csv
-*.safetensors
-checkpoint-*/
-
+# ==============================================================================
+# 2. Môi trường phát triển & IDE (Jupyter, VS Code, Python)
+# ==============================================================================
 .ipynb_checkpoints/
 *.ipynb_checkpoints
+.vscode/
+.idea/
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# ==============================================================================
+# 3. Tài liệu báo cáo nộp riêng (Word, PowerPoint, Excel)
+# Không đưa tài liệu báo cáo lên GitHub (theo yêu cầu nộp riêng)
+# ==============================================================================
+*.docx
+*.doc
+~$*.docx
+~$*.doc
+*.pptx
+*.ppt
+~$*.pptx
+~$*.ppt
+*.xlsx
+*.xls
+~$*.xlsx
+~$*.xls
+
+# ==============================================================================
+# 4. Trọng số mô hình nặng (> 100MB - Chặn cứng giới hạn GitHub)
+# ==============================================================================
+*.safetensors
+*.bin
+*.pt.bin
+checkpoint-*/
+**/checkpoint-*/
+best_model/
+**/best_model/
+
+# ==============================================================================
+# 5. PhoBERT: Thư viện ngoài & Dữ liệu trung gian nặng
+# ==============================================================================
+# Thư viện VnCoreNLP (nặng 140MB - không cần thiết trên Git)
+notebooks/models/Phobert/vncorenlp/
+
+# Cache tokenized tensors của PhoBERT (nặng ~30MB)
+notebooks/models/Phobert/*_tokenized.pt
+
+# Dữ liệu văn bản tiền xử lý trung gian của PhoBERT (~67MB)
+notebooks/models/Phobert/*_cleaned.csv
+notebooks/models/Phobert/*_segmented.csv
+notebooks/models/Phobert/vifactcheck_train.csv
+notebooks/models/Phobert/vifactcheck_dev.csv
+notebooks/models/Phobert/vifactcheck_test.csv
+
+# ==============================================================================
+# 6. TF-IDF + Logistic Regression: Dữ liệu trung gian & Model binary do AI gen
+# ==============================================================================
+# File text trung gian tự sinh (nặng ~40MB)
+notebooks/models/TFIDF_Logistic_Regression/outputs/07_processed_*.csv
+
+# Ma trận đặc trưng nhị phân (.npz nặng ~2.1MB)
+notebooks/models/TFIDF_Logistic_Regression/outputs/08_tfidf_*.npz
+
+# Model serialized binary (.joblib nặng ~1.4MB, không commit file nhị phân)
+notebooks/models/TFIDF_Logistic_Regression/outputs/*.joblib
+
+# Thư mục data trùng lặp (nếu có)
+notebooks/models/TFIDF_Logistic_Regression/reports/data/
+
+# ==============================================================================
+# 7. BamiBERT: Checkpoints & Outputs trung gian
+# ==============================================================================
+outputs/*
+notebooks/models/bamibert/outputs/*
+
+# Giữ lại bảng Leaderboard tổng hợp của BamiBERT
+!notebooks/models/bamibert/outputs/bamibert/experiments_leaderboard.csv
