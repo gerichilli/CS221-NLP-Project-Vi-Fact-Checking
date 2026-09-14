@@ -1,0 +1,125 @@
+{
+  "run_id": "20260912T150042_282820Z",
+  "seed": 42,
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "matplotlib": "3.11.2",
+    "seaborn": "0.13.2",
+    "scikit-learn": "1.9.1",
+    "underthesea": "9.5.0",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1",
+    "openpyxl": "3.1.5",
+    "python": "3.12.14"
+  },
+  "dataset_sha256": {
+    "train": "b11b6d02e98a70ac443051eb02570628330dd955d095a606a4f8a92639e09d84",
+    "dev": "8c6abd60234052401acb63f1552500a3f26c759f382325cc8b257cf8aea451ca",
+    "test": "0fa7643351dc3c1227521e50e947d272b6082003f1ce810575e349195cb38c15"
+  },
+  "best_experiment": "P1_clean_segment_(1, 1)",
+  "best_config": {
+    "lowercase": false,
+    "remove_punctuation": false,
+    "remove_stopwords": false
+  },
+  "dev_metrics": {
+    "accuracy": 0.39280774550484093,
+    "macro_precision": 0.39017771986749944,
+    "macro_recall": 0.39244952476782086,
+    "macro_f1": 0.3908053827778795
+  },
+  "test_metrics": {
+    "accuracy": 0.3863165169315826,
+    "macro_precision": 0.3813217813217813,
+    "macro_recall": 0.3835108762637726,
+    "macro_f1": 0.3811104856115497
+  },
+  "raw_shapes": {
+    "train": [
+      5062,
+      10
+    ],
+    "dev": [
+      723,
+      10
+    ],
+    "test": [
+      1447,
+      10
+    ]
+  },
+  "filter_report": [
+    {
+      "split": "train",
+      "before": 5062,
+      "kept": 5062,
+      "removed": 0
+    },
+    {
+      "split": "dev",
+      "before": 723,
+      "kept": 723,
+      "removed": 0
+    },
+    {
+      "split": "test",
+      "before": 1447,
+      "kept": 1447,
+      "removed": 0
+    }
+  ],
+  "overlap_summary": [
+    {
+      "split_a": "train",
+      "split_b": "dev",
+      "exact_pairs": 0,
+      "shared_statements": 1,
+      "conflicting_pair_rows": 0
+    },
+    {
+      "split_a": "train",
+      "split_b": "test",
+      "exact_pairs": 1,
+      "shared_statements": 1,
+      "conflicting_pair_rows": 0
+    },
+    {
+      "split_a": "dev",
+      "split_b": "test",
+      "exact_pairs": 0,
+      "shared_statements": 0,
+      "conflicting_pair_rows": 0
+    }
+  ],
+  "feature_summary": [
+    {
+      "split": "train",
+      "rows": 5062,
+      "features": 15293,
+      "nnz": 174798,
+      "density": 0.0022579880016791974,
+      "zero_vector_rows": 0
+    },
+    {
+      "split": "dev",
+      "rows": 723,
+      "features": 15293,
+      "nnz": 24061,
+      "density": 0.0021761192326305917,
+      "zero_vector_rows": 0
+    },
+    {
+      "split": "test",
+      "rows": 1447,
+      "features": 15293,
+      "nnz": 47941,
+      "density": 0.0021664360263294663,
+      "zero_vector_rows": 0
+    }
+  ],
+  "split_policy": "original shared splits retained; Train only fit, Dev selection, Test reporting",
+  "preprocessing_source_sha256": "c580e107434c3be6b1c9a44694e59782c69df52f36b09a4c5dfdc2893fba8532",
+  "reload_prediction_check": true
+}

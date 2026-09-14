@@ -1,0 +1,4 @@
+﻿split_a,split_b,exact_pairs,shared_statements,conflicting_pair_rows
+train,dev,0,1,0
+train,test,1,1,0
+dev,test,0,0,0

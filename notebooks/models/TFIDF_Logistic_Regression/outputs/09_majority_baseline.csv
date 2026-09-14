@@ -1,0 +1,2 @@
+﻿baseline,label,accuracy,macro_precision,macro_recall,macro_f1
+train_majority,Supported,0.3510711817553559,0.1170237272517853,0.3333333333333333,0.173231031543052

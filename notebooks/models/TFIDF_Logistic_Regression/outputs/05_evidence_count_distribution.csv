@@ -1,0 +1,5 @@
+﻿split,distinct_evidence_per_statement,num_statements
+train,1,5058
+train,2,2
+dev,1,723
+test,1,1447

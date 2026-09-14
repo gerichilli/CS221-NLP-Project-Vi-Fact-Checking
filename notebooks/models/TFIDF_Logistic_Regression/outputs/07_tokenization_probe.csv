@@ -1,0 +1,5 @@
+﻿config,raw,processed,tfidf_tokens
+P1_clean_segment,"Việt Nam không tăng 6.5% ngày 25/3/2023, mà giảm 8%.","Việt_Nam không tăng 6.5 % ngày 25/3/2023 , mà giảm 8 % .","['Việt_Nam', 'không', 'tăng', '6', '5', 'ngày', '25', '3', '2023', 'mà', 'giảm', '8']"
+P2_lower,"Việt Nam không tăng 6.5% ngày 25/3/2023, mà giảm 8%.","việt_nam không tăng 6.5 % ngày 25/3/2023 , mà giảm 8 % .","['việt_nam', 'không', 'tăng', '6', '5', 'ngày', '25', '3', '2023', 'mà', 'giảm', '8']"
+P3_lower_no_punct,"Việt Nam không tăng 6.5% ngày 25/3/2023, mà giảm 8%.","việt_nam không tăng 6.5 % ngày 25 3 2023 , mà giảm 8 % .","['việt_nam', 'không', 'tăng', '6', '5', 'ngày', '25', '3', '2023', 'mà', 'giảm', '8']"
+P5_lower_lexical,"Việt Nam không tăng 6.5% ngày 25/3/2023, mà giảm 8%.","việt_nam không tăng 6.5 % ngày 25/3/2023 , mà giảm 8 % .","['việt_nam', 'không', 'tăng', '6', '5', 'ngày', '25', '3', '2023', 'mà', 'giảm', '8']"
