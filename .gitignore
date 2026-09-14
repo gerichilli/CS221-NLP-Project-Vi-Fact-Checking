@@ -1,7 +1,11 @@
 .DS_Store
 
 # Models
-outputs/
+notebooks/models/bamibert/outputs/*
+outputs/*
+!outputs/bamibert/
+outputs/bamibert/*
+!outputs/bamibert/experiments_leaderboard.csv
 *.safetensors
 checkpoint-*/
 
