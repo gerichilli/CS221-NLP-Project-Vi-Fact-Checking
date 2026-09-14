@@ -1,0 +1,10 @@
+split,field,n_rows,not_nfc_normalized,contains_html_or_url,contains_double_space,n_missing
+train,Statement,5062,0,2,0,0
+train,Context,5062,0,120,0,0
+train,Evidence,5062,0,4,0,0
+dev,Statement,723,0,1,0,0
+dev,Context,723,0,15,0,0
+dev,Evidence,723,0,1,0,0
+test,Statement,1447,0,2,0,0
+test,Context,1447,0,33,0,0
+test,Evidence,1447,0,2,0,0
