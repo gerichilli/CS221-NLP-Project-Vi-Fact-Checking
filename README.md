@@ -1,178 +1,337 @@
-# 🇻🇳 Vietnamese Fact-Checking (ViFactCheck) — CS221 Course Project
+# Vietnamese Fact Checking
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-orange)](https://huggingface.co/)
-[![Course](https://img.shields.io/badge/CS221-Natural%20Language%20Processing-green.svg)](https://uit.edu.vn/)
+## 1. Giới thiệu bài toán
 
-Dự án nghiên cứu và xây dựng hệ thống **Tự động kiểm chứng thông tin tiếng Việt (Automated Vietnamese Fact-Checking)** trên tập dữ liệu benchmark **ViFactCheck**, thuộc khuôn khổ môn học **CS221 — Xử lý Ngôn ngữ Tự nhiên (Natural Language Processing)**.
+Fact Checking là bài toán xác định một Claim có được hỗ trợ, bị bác bỏ hay chưa đủ bằng chứng dựa trên thông tin liên quan.
 
-Dự án triển khai và thực nghiệm so sánh toàn diện qua 4 hướng tiếp cận: từ mô hình thống kê cổ điển (**TF-IDF + Logistic Regression**), mô hình ngôn ngữ tiền huấn luyện theo từ (**PhoBERT**), chuỗi thực nghiệm tối ưu chuyên sâu (**BamiBERT SOTA**), đến mô hình sinh ngôn ngữ lớn (**LLM QLoRA Fine-Tuning**).
+Đồ án tập trung vào **Fact Verification tiếng Việt** trên bộ dữ liệu **ViFactCheck**, với ba nhãn:
 
----
+- `SUPPORTED`
+- `REFUTED`
+- `NEI` (Not Enough Information)
 
-## 📌 1. Bài toán & Dữ liệu (Problem Formulation & Dataset)
+Mục tiêu của nhóm là xây dựng và đánh giá một pipeline fact-checking, từ xử lý dữ liệu, xây dựng mô hình NLI đến tự động tìm kiếm và xếp hạng lại Evidence.
 
-### 1.1. Phát biểu bài toán (Task Definition)
-Kiểm chứng thông tin được mô hình hóa dưới dạng bài toán **Nhận diện suy luận ngữ nghĩa (Natural Language Inference - NLI)** theo cặp câu:
-$$\text{Input} = (\text{Claim}, \text{Evidence}) \longrightarrow \text{Output} \in \{\text{SUPPORTED}, \text{REFUTED}, \text{NEI}\}$$
-
-* **SUPPORTED (Ủng hộ):** Bằng chứng cung cấp đầy đủ dữ liệu xác thực tính đúng đắn của khẳng định.
-* **REFUTED (Bác bỏ):** Bằng chứng mâu thuẫn trực tiếp hoặc phủ định tính đúng đắn của khẳng định.
-* **NEI (Not Enough Info - Không đủ thông tin):** Bằng chứng không cung cấp đủ căn cứ logic để kết luận khẳng định đúng hay sai.
-
-### 1.2. Thống kê tập dữ liệu ViFactCheck
-| Phân chia (Split) | Số lượng mẫu (Samples) | Tỷ lệ (%) | Mục đích |
-| :--- | :---: | :---: | :--- |
-| **Train** | 10,980 | 78.4% | Huấn luyện mô hình |
-| **Dev (Validation)** | 1,577 | 11.3% | Tinh chỉnh siêu tham số, Early Stopping |
-| **Test** | 1,447 | 10.3% | Đánh giá độc lập chất lượng mô hình |
-| **Tổng cộng** | **14,004** | **100%** | |
+**Trạng thái:** Đã thực hiện; một số thực nghiệm End-to-End đang được hoàn thiện.
 
 ---
 
-## 🏆 2. Bảng kết quả tổng hợp (Benchmark Leaderboard)
+## 2. Các công trình liên quan
 
-Dưới đây là kết quả đánh giá thực tế của toàn bộ các mô hình trên cùng một tập kiểm thử độc lập (**Test Set - 1,447 mẫu**):
+Nhóm khảo sát các hướng tiếp cận cho bài toán Fact Checking/NLI, bao gồm:
 
-| Mô hình (Model Architecture) | Hướng tiếp cận (Paradigm) | Test Accuracy | Test Macro-F1 | REFUTED F1 | SUPPORTED F1 | NEI F1 | Vị trí / Đánh giá |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **TF-IDF + Logistic Regression** | Statistical NLP Baseline | 38.63% | 38.11% | 31.77% | 45.20% | 37.37% | Baseline cổ điển |
-| **BamiBERT Baseline** | Pre-trained RoBERTa | 81.76% | 81.57% | 75.00% | 82.80% | 86.91% | Baseline Transformer |
-| **PhoBERT Base v2** | Word-level Transformer | 84.45% | 84.44% | 81.23% | 87.87% | 84.22% | Strong Transformer |
-| 🥇 **BamiBERT (Exp006 - SOTA)** | **Prefix Prompting + Tuning** | **84.87%** | **84.84%** | **81.62%** | **85.14%** | **87.75%** | **Best Transformer** |
-| 🚀 **LLM QLoRA (Fine-Tuned)** | Generative Instruction Tuning | **87.01%** | **87.02%** | — | — | — | **SOTA Toàn diện** |
+- Classical Machine Learning
+- Transformer-based NLI
+- Large Language Models
+- Information Retrieval
+- Information Extraction
+- Evidence Ranking
 
-### 💡 Nhận xét học thuật nổi bật:
-1. **Sự sụp đổ của mô hình túi từ (Bag-of-Words):** TF-IDF chỉ đạt F1 ~38.11% (gần mức đoán ngẫu nhiên 3 lớp 33.3%). Điều này phản ánh rõ bản chất của Fact-Checking: mô hình bắt buộc phải hiểu ngữ cảnh và quan hệ logic (mâu thuẫn, khẳng định, thiếu hụt) thay vì chỉ đếm tần suất trùng lặp từ vựng.
-2. **Đột phá từ Semantic Prefix Prompting (BamiBERT Exp006):** 
-   - Thay vì ghép chuỗi thông thường `[CLS] claim [SEP] evidence [SEP]`, kỹ thuật định danh tiền tố `Khẳng định: {claim} Bằng chứng: {evidence}` giúp mô hình phân định rạch ròi vai trò của từng câu.
-   - Kết hợp cùng **Weighted Loss (1.3x cho REFUTED)** và **Cosine Annealing Scheduler**, F1 của lớp khó nhất là **REFUTED tăng vọt từ 75.00% lên 81.62% (+6.62%)**, đưa BamiBERT vượt qua PhoBERT để trở thành mô hình Discriminative tốt nhất dự án (**84.84% Macro-F1**).
-3. **Sức mạnh khái quát của LLM:** Fine-tuning LLM qua QLoRA đem lại năng lực suy luận ngữ nghĩa vượt trội, đạt đỉnh **87.02% Macro-F1**.
+Từ việc khảo sát, nhóm tập trung vào vấn đề: **Evidence có chất lượng ảnh hưởng trực tiếp đến khả năng Fact Verification**. Retrieval dựa trên độ tương đồng từ khóa có thể chọn các câu giống Claim nhưng chưa chắc phù hợp về mặt fact.
+
+Từ đó, nhóm phát triển hướng **Fact-aware Evidence Reranking**, sử dụng thêm các đặc trưng Entity, Number và Date.
+
+**Trạng thái:** Đang hoàn thiện phần Research Gap và Related Work.
 
 ---
 
-## 🔬 3. Chuỗi thực nghiệm tối ưu BamiBERT (Ablation Study)
+## 3. Các hướng giải quyết
 
-Để tìm ra cấu hình BamiBERT SOTA, nhóm đã thiết kế chuỗi 7 thực nghiệm có kiểm soát (*ablation study*) được lưu vết tại [`notebooks/models/bamibert/outputs/bamibert/experiments_leaderboard.csv`](file:///notebooks/models/bamibert/outputs/bamibert/experiments_leaderboard.csv):
+Nhóm triển khai và so sánh nhiều hướng tiếp cận:
 
-```
-Exp000: Baseline (lr=2e-5, bs=8, linear)                      --> Macro-F1: 81.57% (Refuted: 75.00%)
-  │
-  ├── Exp001: Warmup 10% + Gradient Accumulation 2 (Eff BS=16) --> Macro-F1: 83.31%
-  ├── Exp002: Lower LR (1e-5) chống overfit                     --> Macro-F1: 83.40%
-  ├── Exp003: Higher LR (3e-5)                                 --> Macro-F1: 83.43%
-  ├── Exp004: Class-Weighted Loss (1.3x REFUTED)                --> Macro-F1: 82.83%
-  ├── Exp005: Cosine Annealing + Weight Decay 0.05 + Ep=6       --> Macro-F1: 83.48%
-  │
-  ├── 🏆 Exp006 (SOTA): Prefix Prompting + Best Hyperparams    --> Macro-F1: 84.84% (Refuted: 81.62% 🔥)
-  │
-  └── Exp007: Extended 10 Epochs + Early Stopping (Patience=3)  --> Macro-F1: 82.10% (Overfitting)
-```
+### 3.1. Classical Baseline
+
+- TF-IDF
+- Logistic Regression
+
+### 3.2. Transformer NLI
+
+- PhoBERT
+- BamiBERT
+
+### 3.3. Large Language Model
+
+- Fine-tuning LLM bằng LoRA/QLoRA
+
+### 3.4. Evidence Retrieval
+
+- BM25
+- Top-K Evidence Retrieval
+
+### 3.5. Fact-aware Evidence Processing
+
+- Named Entity Extraction
+- Numerical Fact Extraction
+- Temporal Information Extraction
+- Fact-aware Evidence Reranking
+
+> **FastText + BiLSTM:** Không sử dụng trong pipeline chính; chỉ là **thực nghiệm bổ sung**.
+
+**Trạng thái:** Phần lớn đã thực hiện; IR → IE → Reranking đang được hoàn thiện.
 
 ---
 
-## 📂 4. Cấu trúc thư mục dự án (Repository Structure)
+## 4. Phương pháp nhóm thực hiện
 
-```plaintext
-Project-NLP-Fact-Checking/
-├── README.md                                 # Báo cáo tổng quan dự án
-├── requirements.txt                          # Thư viện môi trường Python
-├── .gitignore                                # Cấu hình loại bỏ file rác & weights nặng
-│
-├── data/                                     # Dữ liệu thực nghiệm
-│   ├── raw/ViFactCheck_original/             # Dữ liệu gốc (train, dev, test)
-│   └── processed/common_cleaned/             # Dữ liệu làm sạch chuẩn hóa chung
-│
-└── notebooks/
-    ├── preprocessing/
-    │   └── common_cleaning.ipynb             # Pipeline tiền xử lý văn bản tiếng Việt
-    │
-    └── models/
-        ├── TFIDF_Logistic_Regression/        # 1. Classical Baseline
-        │   ├── EDA_TFIDF_Logistic_Regression.ipynb
-        │   └── outputs/                      # Báo cáo EDA, ma trận nhầm lẫn, biểu đồ
-        │
-        ├── Phobert/                          # 2. PhoBERT Base v2
-        │   ├── preprocessing_phobert.ipynb   # Tiền xử lý từ & huấn luyện PhoBERT
-        │   └── phobert_model/                # Lịch sử train & dự đoán test
-        │
-        ├── bamibert/                         # 3. BamiBERT Experiments (SOTA)
-        │   ├── bamibert_baseline.ipynb       # Huấn luyện Baseline chuẩn mực
-        │   ├── bamibert_experiments.ipynb    # 7 thực nghiệm tối ưu & Ablation Study
-        │   └── outputs/bamibert/             # Bảng Leaderboard thực nghiệm (.csv)
-        │
-        └── LLM/                              # 4. Large Language Model (QLoRA)
-            ├── LLM_FineTuning.ipynb          # Pipeline tinh chỉnh mô hình sinh
-            ├── prompts/                      # Dữ liệu định dạng Prompt (JSONL)
-            └── outputs/                      # Báo cáo đánh giá NLI & ma trận lỗi
+Pipeline chính:
+
+```text
+Raw Dataset
+     ↓
+Common Preprocessing
+     ↓
+NLI Baselines
+     ↓
+Claim + Context
+     ↓
+Information Retrieval
+     ↓
+BM25 Top-K Evidence
+     ↓
+Information Extraction
+     ↓
+Fact-aware Evidence Reranking
+     ↓
+Claim + Reranked Evidence
+     ↓
+BamiBERT / PhoBERT
+     ↓
+Fact Verification
 ```
 
----
+### 4.1. Common Preprocessing
 
-## 🚀 5. Hướng dẫn cài đặt & Thực thi (Quickstart)
+Các bước làm sạch chung:
 
-### 5.1. Khởi tạo môi trường
-Yêu cầu: **Python >= 3.10** và khuyến nghị GPU (NVIDIA CUDA hoặc Apple Silicon MPS) khi huấn luyện lại.
+- Missing value checking
+- Cleaning
+- Whitespace normalization
+- Unicode normalization
+- Control/format character handling
 
-```bash
-# 1. Clone repository
-git clone https://github.com/<your-username>/Project-NLP-Fact-Checking.git
-cd Project-NLP-Fact-Checking
+### 4.2. Model-specific Preprocessing
 
-# 2. Tạo môi trường ảo
-python3 -m venv .venv
-source .venv/bin/activate   # Trên Windows: .venv\Scripts\activate
+Dữ liệu sau common preprocessing được chuẩn bị phù hợp với từng mô hình:
 
-# 3. Cài đặt các gói phụ thuộc
-pip install -U pip
-pip install -r requirements.txt
+- TF-IDF + Logistic Regression
+- PhoBERT
+- BamiBERT
+- LLM LoRA/QLoRA
+
+### 4.3. Information Retrieval
+
+Input:
+
+```text
+Claim + Context
 ```
 
-### 5.2. Chạy và tái lập kết quả
-Mỗi mô hình được đóng gói trọn vẹn trong Jupyter Notebook tương ứng:
-* **Mô hình TF-IDF:** Mở và chạy [`notebooks/models/TFIDF_Logistic_Regression/EDA_TFIDF_Logistic_Regression.ipynb`](file:///notebooks/models/TFIDF_Logistic_Regression/EDA_TFIDF_Logistic_Regression.ipynb).
-* **Mô hình PhoBERT:** Mở và chạy [`notebooks/models/Phobert/preprocessing_phobert.ipynb`](file:///notebooks/models/Phobert/preprocessing_phobert.ipynb).
-* **Mô hình BamiBERT:**
-  - Chạy Baseline: [`notebooks/models/bamibert/bamibert_baseline.ipynb`](file:///notebooks/models/bamibert/bamibert_baseline.ipynb).
-  - Chạy chuỗi Ablation Study: [`notebooks/models/bamibert/bamibert_experiments.ipynb`](file:///notebooks/models/bamibert/bamibert_experiments.ipynb).
-* **Mô hình LLM:** Mở và chạy [`notebooks/models/LLM/LLM_FineTuning.ipynb`](file:///notebooks/models/LLM/LLM_FineTuning.ipynb).
+Context được chia thành các sentence/evidence candidates.
 
-> [!NOTE]
-> Tất cả các Notebooks trên GitHub đều **đã được lưu trữ sẵn toàn bộ output, bảng chỉ số và biểu đồ trực quan**, người xem không bắt buộc phải tải lại trọng số để xem kết quả đánh giá.
-
----
-
-## 📦 6. Lưu ý về Trọng số Mô hình & Hugging Face
-
-Theo chính sách của GitHub (giới hạn file tối đa 100MB), các tệp trọng số nhị phân nặng (`model.safetensors` từ 393MB – 515MB) cùng các thư mục checkpoint huấn luyện tạm thời không được đưa lên repository này (được cấu hình trong [`.gitignore`](file:///Project-NLP-Fact-Checking/.gitignore)).
-
-Trọng số của mô hình xuất sắc nhất (**BamiBERT Exp006 SOTA**) có thể được tải về hoặc gọi trực tiếp từ Hugging Face Hub:
-
-```python
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
-# Load checkpoint BamiBERT SOTA
-model_name = "bamboodata/bamibert-base"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-# Tải checkpoint đã fine-tune từ Hugging Face Hub (nếu có)
+```text
+Claim
+  ↓
+BM25 scoring
+  ↓
+Ranking
+  ↓
+Top-K Evidence
 ```
 
+### 4.4. Information Extraction
+
+Từ Claim và Retrieved Evidence, nhóm trích xuất:
+
+- Entity
+- Number
+- Date/Time
+
+### 4.5. Fact-aware Evidence Reranking
+
+Kết hợp:
+
+```text
+BM25 Score
++
+Fact-level Features
+```
+
+để xếp hạng lại Evidence trước khi đưa vào NLI.
+
+**Trạng thái:** IR → IE → Reranking đang thực hiện.
+
 ---
 
-## 👥 7. Phân công thực hiện (Team Contributions)
+## 5. Cài đặt và thực nghiệm
 
-| Thành viên | Trách nhiệm chính | Mô hình / Hạng mục đảm nhiệm |
-| :--- | :--- | :--- |
-| **Thành viên 1** | Khảo sát dữ liệu (EDA), Tiền xử lý cổ điển | TF-IDF + Logistic Regression Baseline, Báo cáo kiểm tra chất lượng dữ liệu |
-| **Thành viên 2** | Nghiên cứu Transformer tiếng Việt | Pipeline tách từ VnCoreNLP & Huấn luyện PhoBERT Base v2 |
-| **Thành viên 3** | Nghiên cứu SOTA Discriminative & Optimization | Xây dựng BamiBERT Baseline, Thiết kế 7 thực nghiệm Ablation Study, SOTA Prompting |
-| **Thành viên 4** | Nghiên cứu Mô hình Ngôn ngữ Lớn (GenAI) | Thiết kế Prompt NLI (Plain/JSON), Fine-Tuning LLM qua QLoRA / PEFT |
+### 5.1. Dataset
+
+Sử dụng **ViFactCheck** với:
+
+```text
+Train
+Dev
+Test
+```
+
+Dataset được tổ chức dùng chung cho toàn bộ nhóm.
+
+### 5.2. NLI Baseline
+
+Các mô hình đã được huấn luyện/evaluate với Claim + Evidence:
+
+- TF-IDF + Logistic Regression
+- PhoBERT
+- BamiBERT
+- LLM LoRA/QLoRA
+
+BamiBERT, PhoBERT và LLM đã cho kết quả baseline trên 80% theo các metric được nhóm sử dụng.
+
+### 5.3. End-to-End Fact Verification
+
+#### Experiment A — Gold Evidence → NLI
+
+```text
+Claim + Gold Evidence
+        ↓
+NLI
+```
+
+Mục đích: đánh giá verifier khi Evidence được cung cấp chính xác.
+
+**Trạng thái:** Đã thực hiện.
+
+#### Experiment B — BM25 → NLI
+
+```text
+Claim + Context
+        ↓
+BM25
+        ↓
+Retrieved Evidence
+        ↓
+NLI
+```
+
+Mục đích: đánh giá ảnh hưởng của automatic Evidence Retrieval.
+
+**Trạng thái:** Đang thực hiện.
+
+#### Experiment C — BM25 + IE Reranking → NLI
+
+```text
+Claim + Context
+        ↓
+BM25
+        ↓
+Top-K Evidence
+        ↓
+IE
+        ↓
+Fact-aware Reranking
+        ↓
+Reranked Evidence
+        ↓
+NLI
+```
+
+Mục đích: đánh giá liệu fact-level reranking có cải thiện hiệu quả Fact Verification hay không.
+
+**Trạng thái:** Đang thực hiện.
+
+### 5.4. Retrieval Evaluation
+
+Các metric:
+
+- Recall@1
+- Recall@3
+- Recall@5
+
+**Trạng thái:** Đang thực hiện.
 
 ---
 
-## 📚 8. Tài liệu tham khảo (References)
-1. **ViFactCheck Dataset:** Tập dữ liệu kiểm chứng thông tin tiếng Việt tiêu chuẩn cho bài toán NLI Fact-Checking.
-2. **PhoBERT:** Nguyen, D. Q., & Nguyen, A. T. (2020). *PhoBERT: Pre-trained language models for Vietnamese*. EMNLP Findings.
-3. **BamiBERT:** Bamboo Data Lab (2023). *BamiBERT: A Monolingual RoBERTa Model for Vietnamese Natural Language Processing*.
-4. **QLoRA:** Dettmers, T., et al. (2023). *QLoRA: Efficient Finetuning of Quantized LLMs*. NeurIPS.
+## 6. Phân tích kết quả
+
+Nhóm sẽ so sánh:
+
+| Experiment | Evidence | Verifier | Trạng thái |
+|---|---|---|---|
+| A | Gold Evidence | BamiBERT / PhoBERT | Đã thực hiện |
+| B | BM25 Evidence | BamiBERT | Đang thực hiện |
+| C | BM25 + IE Reranking | BamiBERT | Đang thực hiện |
+
+Phân tích:
+
+- Accuracy
+- Macro-F1
+- Precision / Recall / F1
+- Retrieval Recall@K
+- Ảnh hưởng của Evidence Retrieval đến NLI
+- Ảnh hưởng của Fact-aware Reranking đến NLI
+
+### Error Analysis
+
+Dự kiến phân tích:
+
+- Retrieval Error
+- Entity Mismatch
+- Number Mismatch
+- Temporal Mismatch
+- Negation
+- NLI Reasoning Error
+
+**Trạng thái:** Đang thực hiện.
+
+---
+
+## 7. Kết luận
+
+Phần kết luận sẽ tổng hợp:
+
+1. Hiệu quả của các NLI models trên ViFactCheck.
+2. Ảnh hưởng của automatic Evidence Retrieval.
+3. Hiệu quả của Fact-aware Evidence Reranking.
+4. Những trường hợp phương pháp hoạt động tốt/chưa tốt.
+
+**Trạng thái:** Chưa hoàn thiện; chờ kết quả End-to-End.
+
+---
+
+## 8. Hướng phát triển
+
+Các hướng có thể xem xét:
+
+- Dense/Semantic Retrieval
+- Deep Learning-based Reranking
+- Cải thiện Numerical/Temporal Information Extraction
+- LLM-based Data Augmentation
+- Thử nghiệm trên dataset/domain khác
+- Cải thiện xử lý các trường hợp cần suy luận phức tạp
+
+Các hướng trên là **future work**, không thuộc phạm vi bắt buộc của pipeline hiện tại.
+
+**Trạng thái:** Đã xác định; sẽ chọn lọc trong báo cáo cuối.
+
+---
+
+## Project Status
+
+| Thành phần | Trạng thái |
+|---|---|
+| Dataset | ✅ Đã thực hiện |
+| EDA | ✅ Đã thực hiện |
+| Common Preprocessing | ✅ Đã thực hiện |
+| TF-IDF + Logistic Regression | ✅ Đã thực hiện |
+| PhoBERT | ✅ Đã thực hiện |
+| BamiBERT | ✅ Đã thực hiện |
+| LLM LoRA/QLoRA | ✅ Đã thực hiện |
+| FastText + BiLSTM | ⚪ Thực nghiệm bổ sung, không dùng trong pipeline chính |
+| BM25 Retrieval | 🔄 Đang thực hiện |
+| Retrieval Evaluation | 🔄 Đang thực hiện |
+| Information Extraction | 🔄 Đang thực hiện |
+| Fact-aware Reranking | 🔄 Đang thực hiện |
+| End-to-End BamiBERT | 🔄 Đang thực hiện |
+| Error Analysis | 🔄 Đang thực hiện |
+| Conclusion | ⏳ Chờ kết quả cuối |
+| Demo | ⏳ Đang xem xét |
