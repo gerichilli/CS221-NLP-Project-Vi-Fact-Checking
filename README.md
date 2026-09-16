@@ -326,7 +326,6 @@ Các hướng trên là **future work**, không thuộc phạm vi bắt buộc c
 | PhoBERT | ✅ Đã thực hiện |
 | BamiBERT | ✅ Đã thực hiện |
 | LLM LoRA/QLoRA | ✅ Đã thực hiện |
-| FastText + BiLSTM | ⚪ Thực nghiệm bổ sung, không dùng trong pipeline chính |
 | BM25 Retrieval | 🔄 Đang thực hiện |
 | Retrieval Evaluation | 🔄 Đang thực hiện |
 | Information Extraction | 🔄 Đang thực hiện |
