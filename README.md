@@ -65,8 +65,6 @@ Nhóm triển khai và so sánh nhiều hướng tiếp cận:
 - Temporal Information Extraction
 - Fact-aware Evidence Reranking
 
-> **FastText + BiLSTM:** Không sử dụng trong pipeline chính; chỉ là **thực nghiệm bổ sung**.
-
 **Trạng thái:** Phần lớn đã thực hiện; IR → IE → Reranking đang được hoàn thiện.
 
 ---
