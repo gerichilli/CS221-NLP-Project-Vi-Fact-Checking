@@ -65,7 +65,7 @@ Nhóm triển khai và so sánh nhiều hướng tiếp cận:
 - Temporal Information Extraction
 - Fact-aware Evidence Reranking
 
-**Trạng thái:** Phần lớn đã thực hiện; IR → IE → Reranking đang được hoàn thiện.
+**Trạng thái:** Toàn bộ pipeline IR → IE → Reranking đã được hoàn thiện.
 
 ---
 
@@ -324,11 +324,11 @@ Các hướng trên là **future work**, không thuộc phạm vi bắt buộc c
 | PhoBERT | ✅ Đã thực hiện |
 | BamiBERT | ✅ Đã thực hiện |
 | LLM LoRA/QLoRA | ✅ Đã thực hiện |
-| BM25 Retrieval | 🔄 Đang thực hiện |
-| Retrieval Evaluation | 🔄 Đang thực hiện |
-| Information Extraction | 🔄 Đang thực hiện |
-| Fact-aware Reranking | 🔄 Đang thực hiện |
-| End-to-End BamiBERT | 🔄 Đang thực hiện |
-| Error Analysis | 🔄 Đang thực hiện |
-| Conclusion | ⏳ Chờ kết quả cuối |
+| BM25 Retrieval | ✅ Đã thực hiện |
+| Retrieval Evaluation | ✅ Đã thực hiện |
+| Information Extraction | ✅ Đã thực hiện |
+| Fact-aware Reranking | ✅ Đã thực hiện |
+| End-to-End BamiBERT | ✅ Đã thực hiện |
+| Error Analysis | ✅ Đã thực hiện |
+| Conclusion | ✅ Đã thực hiện |
 | Demo | ⏳ Đang xem xét |

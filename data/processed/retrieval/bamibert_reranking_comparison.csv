@@ -1,0 +1,4 @@
+Nguồn Bằng chứng (Evidence Source),Accuracy (%),Macro-F1 (%),REFUTED F1 (%),SUPPORTED F1 (%),NEI F1 (%)
+Gold Evidence,81.05%,81.16%,79.60%,78.53%,85.34%
+BM25 Evidence,62.52%,62.55%,59.10%,67.26%,61.30%
+Fact-aware Reranked Evidence,62.38%,62.42%,58.77%,67.41%,61.08%

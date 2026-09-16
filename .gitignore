@@ -88,3 +88,7 @@ notebooks/models/bamibert/outputs/*
 
 # Giữ lại bảng Leaderboard tổng hợp của BamiBERT
 !notebooks/models/bamibert/outputs/bamibert/experiments_leaderboard.csv
+
+# Scripts phụ trợ nội bộ
+scratch/
+
