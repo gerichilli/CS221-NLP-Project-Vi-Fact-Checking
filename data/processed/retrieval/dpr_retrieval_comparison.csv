@@ -1,0 +1,5 @@
+Phương pháp Truy xuất,Recall@1,Recall@2,Recall@3,Recall@5,MRR
+1. Okapi BM25 Sparse Baseline,89.80%,94.80%,96.40%,97.00%,0.9297
+2. Fact-aware Reranker (Heuristic),90.00%,94.40%,96.20%,97.00%,0.9299
+3. Pure Contrastive DPR (Ours),86.60%,92.20%,94.80%,97.00%,0.9074
+4. Contrastive Hybrid DPR (SOTA 🏆),90.40%,94.60%,96.00%,97.00%,0.9319

@@ -1,0 +1,11 @@
+Mô hình NLI,Kịch bản Bằng chứng,Accuracy,Macro-F1,Tăng trưởng F1
+PhoBERT,A. BM25 Top-1 (Keyword),59.34%,58.53%,-
+PhoBERT,B. Fact Reranked Top-1,59.06%,58.23%,0.00% (Gốc)
+PhoBERT,C. DPR Hybrid Top-1 (MỚI 🚀),65.70%,64.12%,+5.89%
+PhoBERT,D. Top-2 Concatenated,64.18%,64.05%,+5.82%
+PhoBERT,E. Gold Evidence (Lý tưởng),72.75%,72.77%,+14.54%
+BamiBERT Exp006 SOTA,A. BM25 Top-1 (Keyword),62.38%,62.42%,-
+BamiBERT Exp006 SOTA,B. Fact Reranked Top-1,62.38%,62.42%,0.00% (Gốc)
+BamiBERT Exp006 SOTA,C. DPR Hybrid Top-1 (MỚI 🚀),68.33%,67.91%,+5.49%
+BamiBERT Exp006 SOTA,D. Top-2 Concatenated,70.68%,70.39%,+7.97%
+BamiBERT Exp006 SOTA,E. Gold Evidence (Lý tưởng),81.33%,81.42%,+19.00%
