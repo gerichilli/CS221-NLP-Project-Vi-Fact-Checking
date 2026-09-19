@@ -1,0 +1,2 @@
+model_name,accuracy,macro_precision,macro_recall,macro_f1
+vinai/phobert-base-v2,0.8445058742225293,0.8442215935910821,0.8449663210684325,0.8443911032108055

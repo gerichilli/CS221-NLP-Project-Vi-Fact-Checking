@@ -1,0 +1,7 @@
+label_name,predicted_label,error_count
+Supported,Refuted,61
+Refuted,Supported,48
+Refuted,NEI,37
+NEI,Refuted,31
+Supported,NEI,28
+NEI,Supported,20
