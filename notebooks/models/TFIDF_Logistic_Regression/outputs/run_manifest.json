@@ -1,17 +1,17 @@
 {
-  "run_id": "20260912T150042_282820Z",
+  "run_id": "20260919T163534_442073Z",
   "seed": 42,
   "versions": {
-    "numpy": "2.3.5",
+    "numpy": "2.2.0",
     "pandas": "2.2.3",
-    "matplotlib": "3.11.2",
+    "matplotlib": "3.9.3",
     "seaborn": "0.13.2",
-    "scikit-learn": "1.9.1",
+    "scikit-learn": "1.6.0",
     "underthesea": "9.5.0",
-    "joblib": "1.6.0",
-    "scipy": "1.18.1",
+    "joblib": "1.5.2",
+    "scipy": "1.16.3",
     "openpyxl": "3.1.5",
-    "python": "3.12.14"
+    "python": "3.13.9"
   },
   "dataset_sha256": {
     "train": "b11b6d02e98a70ac443051eb02570628330dd955d095a606a4f8a92639e09d84",
@@ -68,29 +68,6 @@
       "before": 1447,
       "kept": 1447,
       "removed": 0
-    }
-  ],
-  "overlap_summary": [
-    {
-      "split_a": "train",
-      "split_b": "dev",
-      "exact_pairs": 0,
-      "shared_statements": 1,
-      "conflicting_pair_rows": 0
-    },
-    {
-      "split_a": "train",
-      "split_b": "test",
-      "exact_pairs": 1,
-      "shared_statements": 1,
-      "conflicting_pair_rows": 0
-    },
-    {
-      "split_a": "dev",
-      "split_b": "test",
-      "exact_pairs": 0,
-      "shared_statements": 0,
-      "conflicting_pair_rows": 0
     }
   ],
   "feature_summary": [
