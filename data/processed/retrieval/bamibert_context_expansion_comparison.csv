@@ -2,6 +2,5 @@ Kịch bản Bằng chứng,Accuracy,Macro-F1,Macro-Precision,Macro-Recall,Tăng
 A. Gold Evidence (Lý tưởng),81.05%,81.16%,81.09%,81.29%,+18.74%
 B. BM25 Top-1 (Keyword),62.52%,62.55%,66.07%,63.20%,+0.13%
 C. Fact-aware Reranked Top-1,62.38%,62.42%,66.04%,63.07%,0.00% (Mốc gốc)
-D. Đề xuất 3B: Sliding Window (±1),69.29%,69.10%,70.72%,68.86%,+6.68%
-E. Đề xuất 3A: Top-2 Concatenated,70.68%,70.39%,71.17%,70.28%,+7.97%
-F. Đề xuất 1: DPR Hybrid Top-1,68.33%,67.91%,73.17%,69.39%,+5.50%
+D. Đề xuất: Sliding Window (±1),69.29%,69.10%,70.72%,68.86%,+6.68%
+E. Đề xuất: Top-2 Concatenated,70.68%,70.39%,71.17%,70.28%,+7.97%

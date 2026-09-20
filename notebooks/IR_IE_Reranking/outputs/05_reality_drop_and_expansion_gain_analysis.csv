@@ -1,4 +1,4 @@
 Chỉ số Phân tích Hiện tượng,PhoBERT (Macro-F1),BamiBERT (Macro-F1),Nhận xét / Ý nghĩa Khoa học
 1. Mức sụt giảm The Reality Drop (Gold -> Reranked Top-1),-25.05%,-19.00%,Hiệu năng tụt dốc trầm trọng khi chuyển từ bằng chứng chuẩn sang câu truy xuất đơn lẻ do mất ngữ cảnh.
-2. Mức phục hồi nhờ Đề xuất 3B (Sliding Window ±1 vs Top-1),+4.52%,+6.68%,"Mở rộng 1 câu lân cận giúp khôi phục các đại từ đồng tham chiếu (ông, bà, việc này)."
-3. Mức phục hồi nhờ Đề xuất 3A (Top-2 Concatenated vs Top-1),+5.81%,+7.97%,Ghép 2 câu bằng chứng có điểm cao nhất đem lại mức phục hồi tối ưu nhất cho cả 2 mô hình.
+2. Mức phục hồi nhờ Đề xuất Sliding Window (±1 vs Top-1),+4.52%,+6.68%,"Mở rộng 1 câu lân cận giúp khôi phục các đại từ đồng tham chiếu (ông, bà, việc này)."
+3. Mức phục hồi nhờ Đề xuất Top-2 Concatenated (vs Top-1),+5.81%,+7.97%,Ghép 2 câu bằng chứng có điểm cao nhất đem lại mức phục hồi tối ưu nhất cho cả 2 mô hình.

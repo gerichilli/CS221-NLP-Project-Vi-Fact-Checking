@@ -2,5 +2,5 @@ Kịch bản Thực nghiệm (Dev 723 mẫu),PhoBERT Accuracy,PhoBERT Macro-F1,B
 A. Gold Evidence (Upper-bound),83.26%,83.28%,81.33%,81.42%,-1.86%
 B. BM25 Top-1 (Keyword),59.34%,58.53%,62.38%,62.42%,+3.89%
 C. Fact-aware Reranked Top-1,59.06%,58.23%,62.38%,62.42%,+4.19%
-D. Đề xuất 3B: Sliding Window (±1),62.93%,62.75%,69.29%,69.10%,+6.35%
-E. Đề xuất 3A: Top-2 Concatenated,64.18%,64.05%,70.68%,70.39%,+6.34%
+D. Đề xuất: Sliding Window (±1),62.93%,62.75%,69.29%,69.10%,+6.35%
+E. Đề xuất: Top-2 Concatenated,64.18%,64.05%,70.68%,70.39%,+6.34%
