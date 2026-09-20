@@ -551,16 +551,16 @@ with st.expander("📊 Xem Báo Cáo Đối Sánh Thực Nghiệm: SBERT/Hybrid 
             if h2h_chart.exists():
                 st.image(str(h2h_chart), caption="Biểu đồ đối đầu BamiBERT vs PhoBERT", use_container_width=True)
         with col_h2:
-            st.markdown("""
-            **Bảng Đối Sánh Điểm Rơi Tối Ưu ($K=2$):**
+            st.markdown(r"""
+            **Bảng Đối Sánh Điểm Tối Ưu ($K=2$):**
             | Mô hình | BM25 Baseline | Hybrid + Fact Rerank (Đề xuất) | Chênh lệch ($\Delta$) |
             | :--- | :---: | :---: | :---: |
             | **PhoBERT-base** | 64.62% | **65.67%** | +1.05% |
             | **BamiBERT** | 71.60% | **72.03%** ⭐ | **+6.36%** vs PhoBERT |
 
-            💡 **Nhận xét quan trọng:**
-            1. **BamiBERT vượt trội toàn diện** hơn PhoBERT từ **+2.0% đến +6.4% Macro F1** trên mọi kịch bản $K$.
-            2. **Quy luật bất biến:** Cả hai mô hình đều đạt điểm rơi phong độ cao nhất tại $K^*=2$ với phương pháp đề xuất **Hybrid + Fact Rerank**.
+            💡 **Nhận xét thực nghiệm:**
+            1. **BamiBERT đạt kết quả cao hơn** PhoBERT từ **+2.0% đến +6.4% Macro F1** trên tất cả các kịch bản $K$.
+            2. **Điểm tối ưu thực nghiệm:** Cả hai mô hình đều đạt hiệu năng cao nhất tại $K^*=2$ khi kết hợp phương pháp đề xuất **Hybrid + Fact Rerank**.
             """)
     
     with tab_matrix:
