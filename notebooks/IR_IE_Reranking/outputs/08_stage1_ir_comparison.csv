@@ -1,0 +1,4 @@
+Phương pháp,Recall@1 (%),Recall@3 (%),Recall@5 (%),Recall@10 (%),MRR
+BM25 (Okapi) [Baseline],89.8,96.4,97.0,99.2,0.9328
+SBERT (Vietnamese Bi-Encoder),82.2,93.0,96.2,98.4,0.8814
+Hybrid (BM25 + SBERT),90.0,95.6,97.2,99.0,0.9323

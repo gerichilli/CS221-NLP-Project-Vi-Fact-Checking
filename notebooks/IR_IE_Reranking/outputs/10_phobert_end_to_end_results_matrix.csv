@@ -1,0 +1,21 @@
+Method,Top_K,Accuracy,Macro_F1
+BM25 Retrieval,1,59.34,58.53
+BM25 Retrieval,2,64.73,64.62
+BM25 Retrieval,3,65.28,64.75
+BM25 Retrieval,4,63.49,62.64
+BM25 Retrieval,5,62.52,61.62
+SBERT Retrieval,1,57.81,56.92
+SBERT Retrieval,2,61.83,61.76
+SBERT Retrieval,3,62.1,62.01
+SBERT Retrieval,4,62.1,61.89
+SBERT Retrieval,5,62.38,61.93
+Hybrid (BM25 + SBERT),1,59.47,58.54
+Hybrid (BM25 + SBERT),2,65.15,65.08
+Hybrid (BM25 + SBERT),3,65.15,64.56
+Hybrid (BM25 + SBERT),4,65.28,64.62
+Hybrid (BM25 + SBERT),5,63.21,62.22
+Hybrid + Fact Rerank (Đề xuất),1,59.34,58.42
+Hybrid + Fact Rerank (Đề xuất),2,65.7,65.67
+Hybrid + Fact Rerank (Đề xuất),3,65.01,64.63
+Hybrid + Fact Rerank (Đề xuất),4,63.62,62.97
+Hybrid + Fact Rerank (Đề xuất),5,62.38,61.33

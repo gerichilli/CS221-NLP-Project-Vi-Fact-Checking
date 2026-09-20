@@ -1,0 +1,6 @@
+Top_K,Accuracy,Macro_F1,Delta_F1_vs_K1,Context_Status
+1,60.72,60.74,0.0,Thiếu hụt ngữ cảnh trầm trọng (Context Starvation)
+2,72.48,72.44,11.7,Điểm cân bằng tối ưu (Optimal Peak K*=2)
+3,69.57,69.21,8.47,Bắt đầu xuất hiện nhiễu thông tin ngoài lề
+4,66.25,65.42,4.68,"Nhiễu tăng, phân tán cơ chế chú ý (Attention Distraction)"
+5,63.07,62.47,1.73,"Bội thực ngữ cảnh, F1 suy giảm về gần mức K=1"
