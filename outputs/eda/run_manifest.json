@@ -1,0 +1,53 @@
+{
+  "part": "eda",
+  "run_id": "20260918T171327_622530Z",
+  "versions": {
+    "numpy": "2.2.0",
+    "pandas": "2.2.3",
+    "matplotlib": "3.9.3",
+    "seaborn": "0.13.2",
+    "python": "3.13.9"
+  },
+  "dataset_sha256": {
+    "train": "b11b6d02e98a70ac443051eb02570628330dd955d095a606a4f8a92639e09d84",
+    "dev": "8c6abd60234052401acb63f1552500a3f26c759f382325cc8b257cf8aea451ca",
+    "test": "0fa7643351dc3c1227521e50e947d272b6082003f1ce810575e349195cb38c15"
+  },
+  "raw_shapes": {
+    "train": [
+      5062,
+      10
+    ],
+    "dev": [
+      723,
+      10
+    ],
+    "test": [
+      1447,
+      10
+    ]
+  },
+  "overlap_summary": [
+    {
+      "split_a": "train",
+      "split_b": "dev",
+      "exact_pairs": 0,
+      "shared_statements": 1,
+      "conflicting_pair_rows": 0
+    },
+    {
+      "split_a": "train",
+      "split_b": "test",
+      "exact_pairs": 1,
+      "shared_statements": 1,
+      "conflicting_pair_rows": 0
+    },
+    {
+      "split_a": "dev",
+      "split_b": "test",
+      "exact_pairs": 0,
+      "shared_statements": 0,
+      "conflicting_pair_rows": 0
+    }
+  ]
+}

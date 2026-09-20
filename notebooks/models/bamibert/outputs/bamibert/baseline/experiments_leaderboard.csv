@@ -1,0 +1,2 @@
+exp_id,description,learning_rate,effective_bs,num_epochs,scheduler,warmup_ratio,class_weights,prefix_prompt,dev_loss,dev_accuracy,dev_f1_macro,test_loss,test_accuracy,test_f1_macro,refuted_f1,supported_f1,nei_f1,checkpoint_dir
+Exp000_Baseline,"BamiBERT Baseline (lr=2e-5, bs=8, warmup=0, weight=1.0)",2e-05,8,5,linear,0.0,None,False,0.9511,0.787,0.7874,0.8046,0.8176,0.8157,0.75,0.84,0.86,./outputs/bamibert/best_model

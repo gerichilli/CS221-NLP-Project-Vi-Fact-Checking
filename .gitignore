@@ -83,9 +83,6 @@ notebooks/models/TFIDF_Logistic_Regression/reports/data/
 # ==============================================================================
 # 7. BamiBERT: Checkpoints & Outputs trung gian
 # ==============================================================================
-outputs/*
-notebooks/models/bamibert/outputs/*
-
 # Giữ lại bảng Leaderboard tổng hợp của BamiBERT
 !notebooks/models/bamibert/outputs/bamibert/experiments_leaderboard.csv
 

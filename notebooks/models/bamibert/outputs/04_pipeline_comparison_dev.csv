@@ -1,0 +1,6 @@
+scenario,accuracy,macro_f1,macro_precision,macro_recall,delta_f1_vs_rerank
+A. Gold Evidence (Upper-bound),0.813278,0.814187,0.818314,0.812328,+18.99%
+B. BM25 Top-1 (Keyword),0.623789,0.624198,0.642105,0.628912,+0.00%
+C. Fact-aware Reranked Top-1,0.623789,0.624198,0.642105,0.628912,0.00% (Gốc)
+D. Đề xuất 3B: Sliding Window (±1),0.692946,0.691034,0.698712,0.690123,+6.68%
+E. Đề xuất 3A: Top-2 Concatenated,0.706777,0.703912,0.710245,0.702198,+7.97%

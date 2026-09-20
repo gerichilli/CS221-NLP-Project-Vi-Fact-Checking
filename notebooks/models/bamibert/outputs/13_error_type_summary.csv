@@ -1,0 +1,6 @@
+error_type,count,percent_in_sample
+Số liệu / Thời gian / Định lượng,30,50.0
+Phủ định / Ngữ nghĩa nghịch đảo,9,15.0
+Tương đồng từ vựng cao (Overfitting lexical overlap),9,15.0
+Suy luận bắc cầu / Cần liên kết thực thể,7,11.666666666666666
+Ngữ cảnh phức hợp / Quan hệ nhân quả,5,8.333333333333332

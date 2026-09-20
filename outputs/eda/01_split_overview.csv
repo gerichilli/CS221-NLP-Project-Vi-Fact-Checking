@@ -1,0 +1,4 @@
+﻿split,num_samples,source_columns,columns_after_label_mapping,columns_with_source_row,percent
+train,5062,10,11,12,69.99446902654867
+dev,723,10,11,12,9.997234513274336
+test,1447,10,11,12,20.008296460176993

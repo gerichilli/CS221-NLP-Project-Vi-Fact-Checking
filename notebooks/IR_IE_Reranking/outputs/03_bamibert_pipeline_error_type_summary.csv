@@ -1,0 +1,5 @@
+error_type,count,percent_in_sample
+Số liệu / Mốc thời gian,36,60.0
+Bằng chứng không liên quan (IR Noise),12,20.0
+Phủ định / Đảo ngữ,9,15.0
+Context Starvation (Thiếu ngữ cảnh quyết định),3,5.0

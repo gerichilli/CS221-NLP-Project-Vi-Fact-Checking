@@ -1,0 +1,7 @@
+gold_label,predicted_label,error_count
+Supported,NEI,108
+Refuted,NEI,60
+Supported,Refuted,54
+NEI,Refuted,39
+Refuted,Supported,18
+NEI,Supported,17

@@ -1,0 +1,6 @@
+Kịch bản Thực nghiệm (Dev 723 mẫu),BamiBERT Acc (%),BamiBERT Macro-F1 (%),PhoBERT Acc (%),PhoBERT Macro-F1 (%),Chênh lệch (BamiBERT - PhoBERT F1)
+A. Gold Evidence (Upper-bound),81.33%,81.42%,83.26%,83.28%,-1.86%
+B. BM25 Top-1 (Keyword),62.38%,62.42%,59.34%,58.53%,+3.89%
+C. Fact-aware Reranked Top-1,62.38%,62.42%,59.06%,58.23%,+4.19%
+D. Đề xuất 3B: Sliding Window (±1),69.29%,69.10%,62.93%,62.75%,+6.35%
+E. Đề xuất 3A: Top-2 Concatenated,70.68%,70.39%,64.18%,64.05%,+6.34%

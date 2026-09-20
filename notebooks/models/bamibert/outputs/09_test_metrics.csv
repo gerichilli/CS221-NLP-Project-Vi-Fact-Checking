@@ -1,0 +1,2 @@
+model_name,accuracy,macro_precision,macro_recall,macro_f1
+Qualcomm-AI-Research/BamiBERT (Exp006 SOTA),0.848652384243262,0.8481893527348072,0.8487957001046925,0.8483906300816826
