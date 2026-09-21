@@ -1,28 +1,30 @@
 """
 HỆ THỐNG XÁC MINH TIN TỨC TIẾNG VIỆT (VIETNAMESE FACT-CHECKING)
 Đồ án môn học: CS221 - Xử lý Ngôn ngữ Tự nhiên (NLP)
-Đối sánh Đa mô hình: Baseline (Gold Evidence) vs Reranking Pipeline (Retrieved Evidence)
+So Sánh Đa Mô Hình: Baseline (Gold Evidence) vs Reranking Pipeline (Retrieved Evidence)
 """
 
+import difflib
+import html
 import random
 from pathlib import Path
 import pandas as pd
 import streamlit as st
 
 # ==============================================================================
-# CẤU HÌNH TRANG WEB & ÉP LIGHT MODE TUYỆT ĐỐI
+# CẤU HÌNH TRANG WEB & ÉP LIGHT MODE
 # ==============================================================================
 st.set_page_config(
-    page_title="ViFactCheck — Đối Sánh & Phân Tích Mô Hình",
+    page_title="ViFactCheck — So Sánh & Phân Tích Dự Đoán",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS ép Light Mode toàn diện, loại bỏ 100% hiện tượng chữ trắng trên nền sáng
+# Custom CSS ép Light Mode toàn diện, loại bỏ chữ trắng trên nền sáng
 st.markdown("""
 <style>
-    /* 1. Ép màu nền và màu chữ toàn cục */
+    /* 1. Nền và màu chữ toàn cục */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
@@ -46,7 +48,7 @@ st.markdown("""
         font-size: 2.1rem;
         font-weight: 800;
         color: #1E3A8A !important;
-        margin-bottom: 0.1rem;
+        margin-bottom: 0.2rem;
     }
     .sub-title {
         font-size: 1.0rem;
@@ -54,8 +56,8 @@ st.markdown("""
         margin-bottom: 1.2rem;
     }
 
-    /* 3. Ô Nhập liệu (Textarea, TextInput, Selectbox) - Luôn có chữ đen đậm, nền trắng */
-    .stTextArea textarea, .stTextInput input {
+    /* 3. Ô Nhập liệu Claim */
+    .stTextArea textarea {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
         border: 1.5px solid #CBD5E1 !important;
@@ -64,16 +66,52 @@ st.markdown("""
         font-weight: 500 !important;
         line-height: 1.6 !important;
     }
-    .stTextArea textarea:focus, .stTextInput input:focus {
+    .stTextArea textarea:focus {
         border-color: #2563EB !important;
         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
     }
-    .stTextArea textarea:disabled {
-        background-color: #F1F5F9 !important;
-        color: #334155 !important;
+
+    /* 4. Thẻ Bằng Chứng (Sử dụng thẻ p - không dùng text box) */
+    .evidence-label {
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .evidence-card {
+        border-radius: 8px;
+        padding: 12px 14px;
+        min-height: 110px;
+        max-height: 170px;
+        overflow-y: auto;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .evidence-card-gold {
+        background-color: #FEFCE8 !important;
+        border: 1.5px solid #FEF08A !important;
+        border-left: 4px solid #EAB308 !important;
+    }
+    .evidence-card-ir {
+        background-color: #F0F9FF !important;
+        border: 1.5px solid #BAE6FD !important;
+        border-left: 4px solid #0284C7 !important;
+    }
+    .evidence-card-top2 {
+        background-color: #ECFDF5 !important;
+        border: 1.5px solid #A7F3D0 !important;
+        border-left: 4px solid #10B981 !important;
+    }
+    .evidence-p {
+        font-size: 0.94rem !important;
+        line-height: 1.6 !important;
+        color: #0F172A !important;
+        margin: 0 !important;
+        font-weight: 500 !important;
     }
 
-    /* 4. Thẻ Mô hình (Model Cards) */
+    /* 5. Thẻ Mô hình (Model Cards) */
     .model-card {
         background-color: #FFFFFF !important;
         border: 1.5px solid #E2E8F0 !important;
@@ -86,7 +124,7 @@ st.markdown("""
         color: #0F172A !important;
     }
 
-    /* 5. Huy hiệu Trạng thái & Nhãn */
+    /* 6. Huy hiệu Trạng thái & Nhãn */
     .status-correct {
         color: #14532D !important;
         background-color: #DCFCE7 !important;
@@ -135,35 +173,37 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* 6. Thẻ Phân tích Chuyên sâu */
-    .analysis-box {
-        background-color: #F8FAFC !important;
-        border: 1.5px solid #E2E8F0 !important;
-        border-radius: 8px;
-        padding: 16px;
-        line-height: 1.7;
-        margin-top: 8px;
-    }
-    .analysis-box * {
+    /* 7. Khung Bài Báo Ngữ Cảnh */
+    .context-container {
+        line-height: 1.85;
         color: #0F172A !important;
+        font-size: 0.96rem;
+        background: #FFFFFF;
+        padding: 18px;
+        border-radius: 8px;
+        border: 1.5px solid #E2E8F0;
+        max-height: 420px;
+        overflow-y: auto;
     }
-    .rescue-callout {
-        background-color: #ECFDF5 !important;
-        border-left: 4px solid #10B981 !important;
-        padding: 12px 16px;
-        border-radius: 6px;
-        margin-top: 10px;
-        color: #064E3B !important;
-    }
-    .rescue-callout * {
-        color: #064E3B !important;
+    .legend-bar {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+        align-items: center;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Đường dẫn file dữ liệu tổng hợp
+# Đường dẫn file dữ liệu
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_PATH = PROJECT_ROOT / "data/processed/unified_demo_predictions.csv"
+CANDIDATES_PATH = PROJECT_ROOT / "data/processed/retrieval/evidence_candidates.csv"
 
 @st.cache_data
 def load_unified_data():
@@ -178,27 +218,88 @@ def load_unified_data():
             df[col] = df[col].astype(str).str.upper()
     return df
 
+@st.cache_data
+def load_candidates_map():
+    if not CANDIDATES_PATH.exists():
+        return {}
+    cands = pd.read_csv(CANDIDATES_PATH)
+    return {cid: group[['sentence_id', 'sentence_text']].to_dict('records') 
+            for cid, group in cands.groupby('claim_id')}
+
 df_all = load_unified_data()
+candidates_map = load_candidates_map()
 
 # ==============================================================================
-# SIDEBAR: BỘ LỌC & DANH SÁCH CÂU VÍ DỤ TỪ DATASET
+# HÀM HỖ TRỢ HIGHLIGHT BÀI BÁO NGỮ CẢNH
+# ==============================================================================
+def check_overlap(s1, s2):
+    """Kiểm tra độ trùng khớp giữa câu trong bài báo và bằng chứng."""
+    s1 = str(s1).strip().lower()
+    s2 = str(s2).strip().lower()
+    if not s1 or not s2 or s1 == 'nan' or s2 == 'nan':
+        return False
+    if s1 in s2 or s2 in s1:
+        return True
+    if len(s1) > 25 and (s1[:30] in s2 or s1[-30:] in s2):
+        return True
+    if len(s2) > 25 and (s2[:30] in s1 or s2[-30:] in s1):
+        return True
+    matcher = difflib.SequenceMatcher(None, s1, s2)
+    match = matcher.find_longest_match(0, len(s1), 0, len(s2))
+    if match.size > 35:
+        return True
+    return False
+
+def render_highlighted_context(claim_id, gold_ev, top2_ev, raw_context):
+    """Tô màu bằng chứng vàng và bằng chứng truy xuất trong bài báo ngữ cảnh."""
+    sents = candidates_map.get(claim_id, [])
+    if not sents:
+        # Fallback hiển thị văn bản thường
+        return f'<p class="evidence-p">{html.escape(str(raw_context))}</p>'
+    
+    html_parts = []
+    for s in sents:
+        stxt = s['sentence_text']
+        esc = html.escape(stxt)
+        is_g = check_overlap(stxt, gold_ev)
+        is_r = check_overlap(stxt, top2_ev)
+        
+        if is_g and is_r:
+            html_parts.append(
+                f'<span style="background-color: #DCFCE7; color: #14532D; padding: 2px 6px; border-radius: 4px; font-weight: 600; border: 1px solid #86EFAC;">{esc} <span style="font-size: 0.75rem; background: #16A34A; color: white; padding: 1px 6px; border-radius: 4px; vertical-align: middle;">🟢 Cả hai</span></span>'
+            )
+        elif is_g:
+            html_parts.append(
+                f'<span style="background-color: #FEF9C3; color: #713F12; padding: 2px 6px; border-radius: 4px; font-weight: 500; border: 1px solid #FDE047;">{esc} <span style="font-size: 0.75rem; background: #CA8A04; color: white; padding: 1px 6px; border-radius: 4px; vertical-align: middle;">🟡 Gold</span></span>'
+            )
+        elif is_r:
+            html_parts.append(
+                f'<span style="background-color: #E0F2FE; color: #075985; padding: 2px 6px; border-radius: 4px; font-weight: 500; border: 1px solid #7DD3FC;">{esc} <span style="font-size: 0.75rem; background: #0284C7; color: white; padding: 1px 6px; border-radius: 4px; vertical-align: middle;">🔵 Retrieval</span></span>'
+            )
+        else:
+            html_parts.append(f'<span>{esc}</span>')
+            
+    return ' '.join(html_parts)
+
+# ==============================================================================
+# SIDEBAR: BỘ LỌC & DANH SÁCH CÂU TỪ DATASET
 # ==============================================================================
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/000000/balance-scale.png", width=60)
     st.markdown("### 🗂️ Chọn Câu Từ Dataset (723 mẫu)")
 
-    # 1. Lọc theo tình huống kinh điển
+    # 1. Lọc theo tình huống
     scenario_filter = st.selectbox(
         "Tình huống nghiên cứu:",
         [
             "Tất cả các câu mẫu",
             "✨ Ca được giải cứu bởi Đề xuất Mở rộng Ngữ cảnh (Top-2)",
-            "📉 Ca The Reality Drop (Baseline ĐÚNG -> Rerank Top-1 SAI)",
-            "💡 Ca Semantic Victory (TF-IDF SAI -> BamiBERT ĐÚNG)",
-            "💥 Ca Thách Thức (Tất cả mô hình đều sai)"
+            "📉 Ca Sụt giảm thực tế (Baseline ĐÚNG -> Rerank Top-1 SAI)",
+            "💡 Ca Ngữ nghĩa thắng Từ khóa (TF-IDF SAI -> BamiBERT ĐÚNG)",
+            "💥 Ca Thách thức (Tất cả mô hình đều sai)"
         ],
         index=1,
-        help="Lọc các ca kinh điển minh họa cho các phát hiện khoa học của đồ án."
+        help="Lọc các ca tiêu biểu minh họa cho kết quả thực nghiệm của đồ án."
     )
 
     # 2. Lọc theo Nhãn thực tế
@@ -219,24 +320,24 @@ with st.sidebar:
             (filtered_df["pred_bamibert_rerank"] != filtered_df["gold_label"]) &
             (filtered_df["pred_bamibert_top2"] == filtered_df["gold_label"])
         ]
-    elif "The Reality Drop" in scenario_filter:
+    elif "Sụt giảm thực tế" in scenario_filter:
         filtered_df = filtered_df[
             (filtered_df["pred_bamibert_gold"] == filtered_df["gold_label"]) & 
             (filtered_df["pred_bamibert_rerank"] != filtered_df["gold_label"])
         ]
-    elif "Semantic Victory" in scenario_filter:
+    elif "Ngữ nghĩa thắng Từ khóa" in scenario_filter:
         filtered_df = filtered_df[
             (filtered_df["pred_tfidf_gold"] != filtered_df["gold_label"]) & 
             (filtered_df["pred_bamibert_gold"] == filtered_df["gold_label"])
         ]
-    elif "Thách Thức" in scenario_filter:
+    elif "Thách thức" in scenario_filter:
         filtered_df = filtered_df[
             (filtered_df["pred_tfidf_gold"] != filtered_df["gold_label"]) & 
             (filtered_df["pred_phobert_gold"] != filtered_df["gold_label"]) &
             (filtered_df["pred_bamibert_gold"] != filtered_df["gold_label"])
         ]
 
-    st.caption(f"Tìm thấy **{len(filtered_df)}** câu phù hợp với tiêu chí lọc.")
+    st.caption(f"Tìm thấy **{len(filtered_df)}** câu phù hợp.")
 
     # Tạo danh sách hiển thị
     options = {}
@@ -245,7 +346,7 @@ with st.sidebar:
         options[f"[{row['claim_id']}] ({row['gold_label']}) {short_stmt}"] = idx
 
     # Nút chọn ngẫu nhiên
-    if st.button("🎲 Chọn Ngẫu Nhiên 1 Câu", use_container_width=True):
+    if st.button("🎲 Chọn Ngẫu Nhiên 1 Câu", width='stretch'):
         if len(options) > 0:
             st.session_state["selected_claim_key"] = random.choice(list(options.keys()))
 
@@ -262,8 +363,8 @@ with st.sidebar:
 # ==============================================================================
 # GIAO DIỆN CHÍNH
 # ==============================================================================
-st.markdown('<div class="main-title">⚖️ ViFactCheck — Khảo Sát Đối Sánh & Phân Tích Dự Đoán</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">So sánh trực diện <b>Baseline (Gold Evidence)</b> vs <b>Reranking Pipeline (Retrieved Evidence)</b> kèm giải thích cơ chế suy luận & phân tích lỗi.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">⚖️ ViFactCheck — Khảo Sát & Phân Tích Dự Đoán</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">So sánh kết quả dự đoán giữa <b>Baseline (Bằng chứng Vàng)</b> và <b>Reranking Pipeline (Bằng chứng Truy xuất)</b> trên 723 mẫu thực tế.</div>', unsafe_allow_html=True)
 
 if not selected_key or len(filtered_df) == 0:
     st.info("Không có câu nào thỏa mãn bộ lọc hiện tại. Vui lòng nới lỏng bộ lọc ở thanh bên trái.")
@@ -276,69 +377,93 @@ gold_label = sample["gold_label"]
 gold_badge_class = "badge-sup" if gold_label == "SUPPORTED" else ("badge-ref" if gold_label == "REFUTED" else "badge-nei")
 gold_icon = "🟢" if gold_label == "SUPPORTED" else ("🔴" if gold_label == "REFUTED" else "⚪")
 
-# Cập nhật session_state để tự động điền vào các ô nhập liệu khi chọn câu mới
-if "last_claim_id" not in st.session_state or st.session_state["last_claim_id"] != sample["claim_id"]:
-    st.session_state["last_claim_id"] = sample["claim_id"]
-    st.session_state["claim_input_val"] = str(sample["statement"])
-    st.session_state["gold_input_val"] = str(sample["gold_evidence"])
-    st.session_state["rerank_input_val"] = str(sample["reranked_evidence"])
-
 # ==============================================================================
-# 1. KHU VỰC CÁC Ô NHẬP LIỆU (TỰ ĐỘNG ĐIỀN KHI CHỌN & CÓ THỂ CHỈNH SỬA)
+# 1. TUYÊN BỐ CẦN KIỂM CHỨNG (CLAIM) & 3 LOẠI BẰNG CHỨNG (THẺ P)
 # ==============================================================================
 st.markdown(
     f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span style="font-size: 1.15rem; font-weight: 700; color: #1E3A8A;">📝 Dữ liệu Phát biểu & Bằng chứng của Mẫu <code>{sample['claim_id']}</code></span>
-        <span>Nhãn Thực Tế: <span class="{gold_badge_class}">{gold_icon} {gold_label}</span></span>
+        <span>Nhãn Thực Tế (Ground Truth): <span class="{gold_badge_class}">{gold_icon} {gold_label}</span></span>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# Ô 1: Tuyên bố (Claim)
+# Chỉ có Claim là cần dùng Text Area
 user_statement = st.text_area(
-    "1. Tuyên bố cần kiểm chứng (Claim / Statement):",
-    key="claim_input_val",
-    height=80,
-    help="Nội dung tuyên bố được tự động điền từ dataset khi bạn chọn câu bên trái. Bạn có thể sửa trực tiếp nếu muốn."
+    "Tuyên bố cần kiểm chứng (Claim / Statement):",
+    value=str(sample["statement"]),
+    height=75,
+    help="Nội dung tuyên bố từ dataset (có thể xem hoặc sao chép)."
 )
 
-col_in_gold, col_in_rerank = st.columns(2)
+# 3 Loại Bằng Chứng Sử Dụng Thẻ <p> (Không dùng text box)
+col_gold, col_ir, col_top2 = st.columns(3)
 
-with col_in_gold:
-    # Ô 2: Bằng chứng Vàng (Gold Evidence)
-    user_gold = st.text_area(
-        "2. Bằng chứng Vàng (Gold Evidence) — [Dành cho Baseline]:",
-        key="gold_input_val",
-        height=110,
-        help="Bằng chứng lý tưởng do chuyên gia gán nhãn trong bài báo."
+with col_gold:
+    st.markdown(
+        """
+        <div class="evidence-label" style="color: #854D0E;">
+            🥇 Bằng chứng Vàng (Gold Evidence)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    gold_text_clean = html.escape(str(sample["gold_evidence"]))
+    st.markdown(
+        f"""
+        <div class="evidence-card evidence-card-gold">
+            <p class="evidence-p">{gold_text_clean}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-with col_in_rerank:
-    # Ô 3: Bằng chứng Truy xuất (Retrieved Top-1)
-    user_rerank = st.text_area(
-        "3. Bằng chứng Truy xuất (IR / Fact Rerank Top-1) — [Dành cho Pipeline]:",
-        key="rerank_input_val",
-        height=110,
-        help="Câu đơn lẻ có điểm BM25 + Fact-aware Rerank cao nhất được máy tự động trích xuất từ bài báo."
+with col_ir:
+    st.markdown(
+        """
+        <div class="evidence-label" style="color: #075985;">
+            🔍 Bằng chứng Truy xuất (IR / Fact Rerank Top-1)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    rerank_text_clean = html.escape(str(sample["reranked_evidence"]))
+    st.markdown(
+        f"""
+        <div class="evidence-card evidence-card-ir">
+            <p class="evidence-p">{rerank_text_clean}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-# Ô 4: Bằng chứng Mở rộng Ngữ cảnh (Top-2 Concatenated)
-st.text_area(
-    "4. Bằng chứng Mở rộng Ngữ cảnh (Top-2 Concatenated) — [Đề xuất Cải tiến của Đồ án]:",
-    value=str(sample["top2_evidence"]),
-    height=80,
-    disabled=True,
-    help="Ghép 2 câu bằng chứng có điểm cao nhất để giải quyết hiện tượng Đói ngữ cảnh (Context Starvation)."
-)
+with col_top2:
+    st.markdown(
+        """
+        <div class="evidence-label" style="color: #065F46;">
+            🚀 Bằng chứng Mở rộng Ngữ cảnh (Top-2 Concatenated)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    top2_text_clean = html.escape(str(sample["top2_evidence"]))
+    st.markdown(
+        f"""
+        <div class="evidence-card evidence-card-top2">
+            <p class="evidence-p">{top2_text_clean}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.markdown("---")
 
 # ==============================================================================
-# 2. BẢNG ĐỐI SÁNH DỰ ĐOÁN 2 NHÓM MÔ HÌNH (SIDE-BY-SIDE)
+# 2. BẢNG SO SÁNH DỰ ĐOÁN 2 NHÓM MÔ HÌNH (SIDE-BY-SIDE)
 # ==============================================================================
-st.markdown("### 🥊 Bảng Đối Sánh Dự Đoán Trực Tiếp")
+st.markdown("### 🥊 Bảng So Sánh Dự Đoán Trực Tiếp")
 
 col_base, col_rerank = st.columns(2)
 
@@ -356,8 +481,9 @@ def render_model_result(model_name: str, pred_label: str, true_label: str, input
                 {status_html}
             </div>
             <div style="font-size: 0.85rem; color: #64748B; margin: 4px 0;">Đầu vào: <i>{input_desc}</i></div>
-            <div style="margin-top: 6px;">
-                Dự đoán: <span class="{p_badge}">{p_icon} {pred_label}</span>
+            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Dự đoán: <span class="{p_badge}">{p_icon} {pred_label}</span></span>
+                <span style="font-size: 0.82rem; color: #64748B;">Thật: <b>{true_label}</b></span>
             </div>
         </div>
         """,
@@ -365,251 +491,94 @@ def render_model_result(model_name: str, pred_label: str, true_label: str, input
     )
 
 with col_base:
-    st.markdown("#### 🏛️ Nhóm 1: BASELINE (Đọc Bằng chứng Vàng)")
+    st.markdown("#### 🏛️ Nhóm 1: BASELINE (Bằng chứng Vàng)")
     render_model_result(
         "1. TF-IDF + Logistic Regression",
         sample["pred_tfidf_gold"],
         gold_label,
-        "Ô 2: Bằng chứng Vàng (Túi từ - BoW)"
+        "Bằng chứng Vàng (Mô hình Túi từ - BoW)"
     )
     render_model_result(
         "2. PhoBERT (Base)",
         sample["pred_phobert_gold"],
         gold_label,
-        "Ô 2: Bằng chứng Vàng (VnCoreNLP Tokenized)"
+        "Bằng chứng Vàng (VnCoreNLP Segmented)"
     )
     render_model_result(
         "3. BamiBERT (Exp006 SOTA)",
         sample["pred_bamibert_gold"],
         gold_label,
-        "Ô 2: Bằng chứng Vàng (Semantic Prefix Prompt)"
+        "Bằng chứng Vàng (Semantic Prefix Prompt)"
     )
-    st.caption("ℹ️ *Ghi chú:* Nhóm Baseline phản ánh trần hiệu năng lý tưởng (Upper-bound) khi dữ liệu sạch không nhiễu.")
+    st.caption("ℹ️ *Nhóm Baseline:* Phản ánh kết quả khi có sẵn bằng chứng sạch do người chọn sẵn.")
 
 with col_rerank:
-    st.markdown("#### 🔄 Nhóm 2: RERANKING PIPELINE (Đọc Bằng chứng IR)")
+    st.markdown("#### 🔄 Nhóm 2: RERANKING PIPELINE (Bằng chứng Truy xuất)")
     render_model_result(
-        "1. PhoBERT (BM25 + Fact Rerank)",
+        "1. PhoBERT (BM25 + Fact Rerank Top-1)",
         sample["pred_phobert_rerank"],
         gold_label,
-        "Ô 3: Câu Top-1 trích xuất từ bài báo"
+        "Câu Top-1 trích xuất tự động từ bài báo"
     )
     render_model_result(
-        "2. BamiBERT (BM25 + Fact Rerank)",
+        "2. BamiBERT (BM25 + Fact Rerank Top-1)",
         sample["pred_bamibert_rerank"],
         gold_label,
-        "Ô 3: Câu Top-1 trích xuất từ bài báo"
+        "Câu Top-1 trích xuất tự động từ bài báo"
     )
     render_model_result(
         "3. BamiBERT + Top-2 Context Expansion",
         sample["pred_bamibert_top2"],
         gold_label,
-        "Ô 4: Ghép 2 câu BM25 + Fact Rerank (Đề xuất Cải tiến)"
+        "Ghép 2 câu Fact Rerank (Đề xuất giải quyết đói ngữ cảnh)"
     )
     if "pred_bamibert_hybrid_top2" in sample and pd.notna(sample["pred_bamibert_hybrid_top2"]):
         render_model_result(
             "4. BamiBERT (Hybrid SBERT+BM25 + Top-2)",
             sample["pred_bamibert_hybrid_top2"],
             gold_label,
-            "Dense SBERT + BM25 + Fact Rerank Top-2 (Module 7.2b)"
+            "Dense SBERT + BM25 + Fact Rerank Top-2"
         )
-    st.caption("ℹ️ *Ghi chú:* Nhóm Reranking phản ánh hiệu năng thực tế khi tích hợp bộ tìm kiếm thông tin từ văn bản bài báo.")
+    st.caption("ℹ️ *Nhóm Pipeline:* Phản ánh hiệu năng thực tế khi hệ thống tự tìm bằng chứng từ bài báo.")
 
 st.markdown("---")
 
 # ==============================================================================
-# 3. PHÂN TÍCH CHUYÊN SÂU: TẠI SAO LẠI CÓ DỰ ĐOÁN NHƯ VẬY & PHÂN TÍCH LỖI
+# 3. BÀI BÁO NGỮ CẢNH GỐC (HIGHLIGHT GOLD & RETRIEVAL EVIDENCE)
 # ==============================================================================
-st.markdown("### 🧠 Phân Tích Chuyên Sâu: Cơ Chế Dự Đoán & Giải Mã Lỗi Sai")
+st.markdown("### 📰 Bài Báo Ngữ Cảnh Gốc (Context Article)")
 
-col_why, col_err = st.columns(2)
+# Thanh chú thích màu highlight
+st.markdown(
+    """
+    <div class="legend-bar">
+        <span style="font-weight: 700; color: #1E293B;">🔍 Chú thích vị trí bằng chứng:</span>
+        <span style="background-color: #FEF9C3; color: #713F12; border: 1px solid #FDE047; padding: 3px 10px; border-radius: 4px; font-weight: 600;">
+            🟡 Bằng chứng Vàng (Gold Evidence)
+        </span>
+        <span style="background-color: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; padding: 3px 10px; border-radius: 4px; font-weight: 600;">
+            🔵 Bằng chứng Truy xuất (Retrieval Evidence)
+        </span>
+        <span style="background-color: #DCFCE7; color: #14532D; border: 1px solid #86EFAC; padding: 3px 10px; border-radius: 4px; font-weight: 600;">
+            🟢 Trùng khớp cả hai (Gold & Retrieval)
+        </span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-with col_why:
-    st.markdown("#### 1. Tại sao các mô hình lại dự đoán như vậy?")
-    
-    # Phân tích cơ chế TFIDF
-    tfidf_pred = sample["pred_tfidf_gold"]
-    if tfidf_pred == gold_label:
-        tfidf_reason = "Khớp được các từ khóa cốt lõi giữa Tuyên bố và Bằng chứng vàng."
-    else:
-        tfidf_reason = "Mô hình túi từ (Bag-of-Words) bị 'mù' trước cấu trúc ngữ pháp phủ định hoặc mối quan hệ bắc cầu giữa các vế câu."
+highlighted_article_html = render_highlighted_context(
+    sample["claim_id"],
+    sample["gold_evidence"],
+    sample["top2_evidence"],
+    sample["context"]
+)
 
-    # Phân tích cơ chế BamiBERT Gold
-    bami_gold_pred = sample["pred_bamibert_gold"]
-    if bami_gold_pred == gold_label:
-        bami_gold_reason = "Cơ chế Self-Attention đa tầng của BamiBERT kết hợp với tiền tố 'Tuyên bố: ... Bằng chứng: ...' đã kích hoạt trúng mối quan hệ suy luận logic."
-    else:
-        bami_gold_reason = "Mô hình gặp khó khăn trước các câu phát biểu có nhiều phủ định kép hoặc thực thể chưa từng xuất hiện trong tập huấn luyện."
-
-    # Phân tích cơ chế Reranking
-    bami_rerank_pred = sample["pred_bamibert_rerank"]
-    is_reality_drop = (bami_gold_pred == gold_label and bami_rerank_pred != gold_label)
-    
-    if is_reality_drop:
-        rerank_reason = f"<b>Hiện tượng The Reality Drop:</b> Câu trích xuất Top-1 <i>('{str(sample['reranked_evidence'])[:75]}...')</i> bị <b>đói ngữ cảnh (Context Starvation)</b>, thiếu mất một vế quan trọng so với Bằng chứng Vàng, khiến mô hình bị nhầm sang <b>{bami_rerank_pred}</b>."
-    else:
-        rerank_reason = "Câu trích xuất Top-1 đã chứa đủ các từ khóa then chốt và thực thể trùng khớp với Tuyên bố."
-
-    st.markdown(
-        f"""
-        <div class="analysis-box">
-            <b>🔹 Cơ chế của Baseline (TF-IDF vs Transformer):</b>
-            <ul style="margin-top: 4px; padding-left: 20px;">
-                <li><b>TF-IDF:</b> {tfidf_reason}</li>
-                <li><b>BamiBERT Gold:</b> {bami_gold_reason}</li>
-            </ul>
-            <b>🔹 Cơ chế của Reranking Pipeline:</b>
-            <p style="margin-top: 4px;">{rerank_reason}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col_err:
-    st.markdown("#### 2. Phân tích Lỗi Sai & Giải pháp Giải cứu")
-    
-    any_wrong = (
-        sample["pred_tfidf_gold"] != gold_label or
-        sample["pred_phobert_gold"] != gold_label or
-        sample["pred_bamibert_gold"] != gold_label or
-        sample["pred_phobert_rerank"] != gold_label or
-        sample["pred_bamibert_rerank"] != gold_label
-    )
-
-    if not any_wrong:
-        st.success("🎉 **Ca hoàn hảo:** Toàn bộ các mô hình (cả Baseline lẫn Reranking Pipeline) đều đưa ra phán quyết CHÍNH XÁC!")
-    else:
-        error_tags = []
-        error_details = []
-
-        if sample["pred_tfidf_gold"] != gold_label and sample["pred_bamibert_gold"] == gold_label:
-            error_tags.append("Bẫy Từ vựng Cục bộ (Lexical Trap trên TF-IDF)")
-            error_details.append("TF-IDF chỉ đếm tần suất từ bề mặt, không hiểu quan hệ entailment/refutation ngữ nghĩa như Transformer.")
-
-        if sample["pred_bamibert_rerank"] != gold_label and sample["pred_bamibert_gold"] == gold_label:
-            error_tags.append("Đói Ngữ Cảnh (Context Starvation / The Reality Drop)")
-            error_details.append("Câu đơn lẻ trích xuất từ IR bị đứt đoạn, mất liên kết chủ ngữ hoặc thiếu mệnh đề bổ trợ so với Bằng chứng Vàng.")
-
-        if sample["pred_phobert_rerank"] == "NEI" or sample["pred_bamibert_rerank"] == "NEI":
-            if gold_label in ["SUPPORTED", "REFUTED"]:
-                error_tags.append("Rơi vào bẫy Chưa đủ thông tin (NEI Trap)")
-                error_details.append(f"Mô hình không dám khẳng định {gold_label} vì câu trích xuất thiếu dữ liệu kiểm chứng trực diện.")
-
-        is_top2_rescued = (sample["pred_bamibert_rerank"] != gold_label and sample["pred_bamibert_top2"] == gold_label)
-        rescue_html = ""
-        if is_top2_rescued:
-            rescue_html = f"""
-            <div class="rescue-callout">
-                <b>🚀 Đề xuất Cải tiến Top-2 Expansion đã GIẢI CỨU thành công:</b><br>
-                Khi ghép thêm câu thứ 2 từ bài báo:
-                <br><i>"{str(sample['top2_evidence'])[:120]}..."</i><br>
-                Mô hình BamiBERT đã được bổ sung đầy đủ ngữ cảnh bị thiếu và <b>lật ngược phán quyết từ SAI ({sample['pred_bamibert_rerank']}) sang ĐÚNG ({sample['pred_bamibert_top2']})</b>!
-            </div>
-            """
-
-        tags_html = " ".join([f"<span class='status-wrong' style='margin-right: 5px; margin-bottom: 4px;'>⚠️ {t}</span>" for t in error_tags])
-        details_html = "".join([f"<li style='margin-bottom: 4px;'>{d}</li>" for d in error_details])
-
-        st.markdown(
-            f"""
-            <div class="analysis-box">
-                <b>Phân loại bản chất lỗi:</b><br>
-                <div style="margin: 8px 0;">{tags_html}</div>
-                <ul style="padding-left: 20px; margin-top: 4px;">{details_html}</ul>
-                {rescue_html}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-# ==============================================================================
-# 4. EXPANDER XEM VĂN BẢN GỐC TOÀN BỘ BÀI BÁO (CONTEXT)
-# ==============================================================================
-with st.expander("📰 Xem toàn bộ bài báo ngữ cảnh gốc (Context Article)"):
-    st.markdown(
-        f'<div style="line-height: 1.8; color: #0F172A !important; font-size: 0.95rem; background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid #E2E8F0;">{sample["context"]}</div>', 
-        unsafe_allow_html=True
-    )
-
-# ==============================================================================
-# 5. EXPANDER: BÁO CÁO ĐỐI SÁNH KHOA HỌC (SBERT & KHẢO SÁT TOP-K BamiBERT)
-# ==============================================================================
-with st.expander("📊 Xem Báo Cáo Đối Sánh Thực Nghiệm: SBERT/Hybrid & Khảo Sát Top-K (1..5)"):
-    tab_matrix, tab_h2h, tab_topk, tab_ir = st.tabs([
-        "🎯 BamiBERT Toàn Diện (4 Chiến Lược x K=1..5)",
-        "🥊 Đối Đầu Trực Diện: BamiBERT vs. PhoBERT",
-        "📈 Khảo sát Top-K BamiBERT (K=1..5)", 
-        "🔍 Đối sánh IR Tầng 1 (BM25 vs SBERT vs Hybrid)"
-    ])
-
-    with tab_h2h:
-        st.markdown("#### 🥊 So Sánh Trực Diện: BamiBERT vs. PhoBERT Trên Toàn Bộ 723 Mẫu Dev")
-        st.caption("Đối chứng 2 mô hình ngôn ngữ tiếng Việt (cùng kích thước Base) trên các chiến lược truy xuất và Top-K từ 1 đến 5.")
-        col_h1, col_h2 = st.columns([1.3, 1])
-        with col_h1:
-            h2h_chart = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/11_head_to_head_phobert_vs_bamibert_curve.png"
-            if h2h_chart.exists():
-                st.image(str(h2h_chart), caption="Biểu đồ đối đầu BamiBERT vs PhoBERT", use_container_width=True)
-        with col_h2:
-            st.markdown(r"""
-            **Bảng Đối Sánh Điểm Tối Ưu ($K=2$):**
-            | Mô hình | BM25 Baseline | Hybrid + Fact Rerank (Đề xuất) | Chênh lệch ($\Delta$) |
-            | :--- | :---: | :---: | :---: |
-            | **PhoBERT-base** | 64.62% | **65.67%** | +1.05% |
-            | **BamiBERT** | 71.60% | **72.03%** ⭐ | **+6.36%** vs PhoBERT |
-
-            💡 **Nhận xét thực nghiệm:**
-            1. **BamiBERT đạt kết quả cao hơn** PhoBERT từ **+2.0% đến +6.4% Macro F1** trên tất cả các kịch bản $K$.
-            2. **Điểm tối ưu thực nghiệm:** Cả hai mô hình đều đạt hiệu năng cao nhất tại $K^*=2$ khi kết hợp phương pháp đề xuất **Hybrid + Fact Rerank**.
-            """)
-    
-    with tab_matrix:
-        st.markdown("#### 🏆 Đối Sánh Trực Diện 4 Chiến Lược Truy Xuất Đưa Vào BamiBERT ($K=1 \\to 5$)")
-        st.caption("Khảo sát toàn diện theo phong cách Figure 4 của bài báo ViFactCheck trên toàn bộ 723 mẫu Dev (20 lượt chạy thực nghiệm).")
-        col_m1, col_m2 = st.columns([1.3, 1])
-        with col_m1:
-            chart_matrix = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/09_end_to_end_model_comparison_chart.png"
-            if chart_matrix.exists():
-                st.image(str(chart_matrix), caption="Biểu đồ hiệu năng BamiBERT (Macro F1) trên 4 chiến lược truy xuất", use_container_width=True)
-        with col_m2:
-            matrix_path = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/09_end_to_end_model_results_matrix.csv"
-            if matrix_path.exists():
-                df_mat = pd.read_csv(matrix_path)
-                # Pivot for neat presentation
-                df_pivot = df_mat.pivot(index="Method", columns="Top_K", values="Macro_F1")
-                st.markdown("**Bảng Macro F1 (%) theo từng $K$:**")
-                st.dataframe(df_pivot, use_container_width=True)
-            st.success("💡 **Điểm mấu chốt:**\n"
-                       "- **Hybrid + Fact Rerank (Đề xuất)** đạt đỉnh cao nhất (**72.03% F1** tại $K=2$).\n"
-                       "- **Pure SBERT** thấp hơn đáng kể (~63% - 67%) vì bỏ sót tên riêng, mốc thời gian, số liệu chính xác.\n"
-                       "- **Hybrid** vượt trội ở $K=1$ (**61.95%**) và $K=3$ (**70.44%**), chứng minh việc kết hợp từ khóa + ngữ nghĩa giúp câu bằng chứng chặt chẽ hơn.")
-
-    with tab_topk:
-        st.markdown("#### 🏆 Khảo Sát Ảnh Hưởng Của Số Lượng Bằng Chứng ($K=1 \\to 5$) Đến BamiBERT")
-        st.caption("Thực nghiệm độc lập trên 723 mẫu tập Dev đối chứng hiện tượng Context Starvation vs Attention Distraction.")
-        col_img1, col_tbl1 = st.columns([1.2, 1])
-        with col_img1:
-            chart_topk = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/07_bamibert_topk_survey_curve.png"
-            if chart_topk.exists():
-                st.image(str(chart_topk), caption="Biểu đồ hiệu năng BamiBERT theo Top-K (Optimal Peak K*=2)", use_container_width=True)
-        with col_tbl1:
-            metrics_topk_path = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/07_bamibert_topk_survey_metrics.csv"
-            if metrics_topk_path.exists():
-                st.dataframe(pd.read_csv(metrics_topk_path), use_container_width=True, hide_index=True)
-            st.info("💡 **Kết luận:** $K^*=2$ là điểm cân bằng vàng (+11.70% Macro F1), các mức $K \\ge 3$ suy giảm do lẫn câu nhiễu ngoài lề.")
-
-    with tab_ir:
-        st.markdown("#### 🎯 So Sánh 3 Chiến Lược Truy Xuất Bằng Chứng Tầng 1 (First-Stage IR)")
-        st.caption("Đánh giá độ phủ bằng chứng (Recall@K) và MRR trên 500 mẫu có Ground-truth Evidence.")
-        col_img2, col_tbl2 = st.columns([1.2, 1])
-        with col_img2:
-            chart_ir = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/08_stage1_ir_comparison.png"
-            if chart_ir.exists():
-                st.image(str(chart_ir), caption="Đối sánh Recall@K giữa BM25 vs SBERT vs Hybrid", use_container_width=True)
-        with col_tbl2:
-            metrics_ir_path = PROJECT_ROOT / "notebooks/IR_IE_Reranking/outputs/08_stage1_ir_comparison.csv"
-            if metrics_ir_path.exists():
-                st.dataframe(pd.read_csv(metrics_ir_path), use_container_width=True, hide_index=True)
-            st.success("💡 **Kết luận:** Hybrid Search (BM25 + SBERT) đạt Recall@1 cao nhất (**90.00%**) và Recall@5 đạt **97.20%**, kết hợp tối ưu giữa từ khóa và ngữ nghĩa vector.")
-
-
+st.markdown(
+    f"""
+    <div class="context-container">
+        {highlighted_article_html}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
