@@ -1,0 +1,6 @@
+Dạng lỗi chính,TF-IDF (%),PhoBERT (%),BamiBERT (%),Qwen2.5 LLM (%)
+1. Sai lệch Số liệu & Mốc thời gian (Numbers / Dates),28.3,46.7,50.0,12.5
+2. Đánh lừa Từ vựng trùng lặp (Lexical Overlap Bias),23.3,10.0,15.0,8.0
+3. Yếu tố Phủ định & Đối nghĩa (Negation / Antonyms),11.7,11.7,15.0,21.3
+4. Suy luận Bắc cầu / Ngữ cảnh phức hợp (Multi-hop Reasoning),18.3,15.0,11.7,15.2
+5. Thận trọng quá mức gán nhãn NEI (Over-conservatism),18.4,16.6,8.3,43.0

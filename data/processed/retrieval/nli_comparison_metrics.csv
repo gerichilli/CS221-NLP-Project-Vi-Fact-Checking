@@ -1,4 +1,4 @@
-Thí nghiệm (Experiment),Loại Bằng chứng,Accuracy,Macro-F1
-A. Gold Evidence (Upper bound),Bằng chứng chuẩn gán nhãn tay,81.05%,0.8116
+Thí nghiệm (Experiment),Nguồn Bằng chứng,Accuracy,Macro-F1
+A. Gold Evidence (Upper bound),Bằng chứng chuẩn do con người gán,81.05%,0.8116
 B. BM25 Evidence,Bằng chứng Top 1 từ BM25 thuần túy,62.52%,0.6255
-C. Fact-aware Reranked Evidence,Bằng chứng Top 1 sau khi Rerank đặc trưng Fact,62.38%,0.6242
+C. Fact-aware Reranked Evidence,Bằng chứng Top 1 sau khi xếp hạng lại bằng Fact,62.38%,0.6242

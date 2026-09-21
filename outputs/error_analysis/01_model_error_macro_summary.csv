@@ -1,0 +1,5 @@
+Model,Architecture,Total_Samples,Errors,Accuracy (%),Macro_F1 (%),Error_Rate (%)
+TF-IDF + Logistic Regression,Classical ML (Bag-of-Words),1447,888,38.63,38.11,61.37
+PhoBERT Base v2,Pretrained RoBERTa (Word-segmented),1447,225,84.45,84.44,15.55
+BamiBERT Exp006,Prefix-Prompt RoBERTa (SOTA Encoder),1447,219,84.87,84.84,15.13
+Qwen2.5-1.5B LoRA,Generative LLM (1.5B Instruct),1447,188,87.01,87.02,12.99
